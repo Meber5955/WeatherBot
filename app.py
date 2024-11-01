@@ -5,7 +5,7 @@ import openai
 app = Flask(__name__)
 
 # OpenAI API 키 설정
-openai.api_key = 'OPENAI_API_KEY'
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # 날씨 설명 생성 함수
 def describe_weather(temperature, humidity, wind_speed):
