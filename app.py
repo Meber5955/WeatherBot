@@ -65,4 +65,6 @@ def chat():
     return jsonify({"reply": chatbot_reply})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # 환경 변수를 통해 포트를 가져오고, 0.0.0.0으로 설정해 외부 접근 가능하게 만듦
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
