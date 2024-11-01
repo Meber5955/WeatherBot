@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, jsonify
 import os
+from flask import Flask, request, jsonify, render_template
 import openai
 
 app = Flask(__name__)
 
-# OpenAI API 키 설정
+# OpenAI API 키 설정 (환경 변수에서 가져오기)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # 날씨 설명 생성 함수
@@ -40,10 +40,12 @@ def describe_weather(temperature, humidity, wind_speed):
 
     return f"{temp_desc} {humidity_desc} {wind_desc}"
 
+# 홈페이지 경로
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# ChatGPT와 날씨 설명 생성 API
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.json
@@ -54,17 +56,21 @@ def chat():
     # 날씨 설명 생성
     weather_description = describe_weather(temperature, humidity, wind_speed)
 
-    # ChatGPT API 호출
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "system", "content": "당신은 기상관측을 도와주는 도우미봇입니다."},
-                  {"role": "user", "content": f"온도, 습도, 풍속이 입력되면 날씨에 대한 대답은 다음과 같습니다: {weather_description}"}]
-    )
+    try:
+        # ChatGPT API 호출
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "system", "content": "당신은 기상 관측을 도와주는 도우미봇입니다."},
+                      {"role": "user", "content": f"대답하는 날씨는 다음과 같습니다.: {weather_description}"}]
+        )
+        chatbot_reply = response['choices'][0]['message']['content']
+        return jsonify({"reply": chatbot_reply})
 
-    chatbot_reply = response['choices'][0]['message']['content']
-    return jsonify({"reply": chatbot_reply})
+    except Exception as e:
+        print("Error during API call:", e)
+        return jsonify({"reply": "API 요청 중 오류가 발생했습니다. 다시 시도해 주세요."})
 
 if __name__ == '__main__':
-    # 환경 변수를 통해 포트를 가져오고, 0.0.0.0으로 설정해 외부 접근 가능하게 만듦
+    # 환경 변수에서 포트를 가져오고, 0.0.0.0에 바인딩하여 외부 접근 허용
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
