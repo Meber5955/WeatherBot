@@ -59,15 +59,15 @@ def chat():
     try:
         # ChatGPT API 호출
         response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "system", "content": "당신은 기상 관측을 도와주는 도우미봇입니다."},
-                      {"role": "user", "content": f"대답하는 날씨는 다음과 같습니다.: {weather_description}"}]
+            model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": "You are a weather assistant."},
+                      {"role": "user", "content": f"The weather is as follows: {weather_description}"}]
         )
         chatbot_reply = response['choices'][0]['message']['content']
         return jsonify({"reply": chatbot_reply})
 
     except Exception as e:
-        print("Error during API call:", e)
+        print("Error during API call:", e)  # 콘솔에 오류 메시지 출력
         return jsonify({"reply": "API 요청 중 오류가 발생했습니다. 다시 시도해 주세요."})
 
 if __name__ == '__main__':
